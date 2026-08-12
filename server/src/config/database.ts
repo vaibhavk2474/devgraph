@@ -1,8 +1,9 @@
 import neo4j from "neo4j-driver";
+import env from "./env.js";
 
-const uri = process.env.COGNODB_URI;
-const username = process.env.COGNODB_USERNAME;
-const password = process.env.COGNODB_PASSWORD;
+const uri = env.cognodbUri;
+const username = env.cognodbUsername;
+const password = env.cognodbPassword;
 
 if (!uri || !username || !password) {
     throw new Error("Missing CognoDB environment variables");
