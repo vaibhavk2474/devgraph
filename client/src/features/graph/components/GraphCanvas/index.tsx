@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ReactFlow, Background, Controls, MiniMap, MarkerType, Position, type Node, type Edge } from "@xyflow/react";
+import { ReactFlow, Background, Controls, MarkerType, Position, type Node, type Edge } from "@xyflow/react";
 
 import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 
@@ -8,7 +8,7 @@ import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import GraphNode from "../GraphNode";
 
-import type { GraphData } from "../../api/graphApi";
+import type { GraphData, GraphPathResponse } from "../../api/graphApi";
 
 const NODE_WIDTH = 180;
 const NODE_HEIGHT = 60;
@@ -57,6 +57,7 @@ function getLayoutedElements(
 			},
 
 			sourcePosition: Position.Right,
+
 			targetPosition: Position.Left,
 		};
 	});
@@ -73,13 +74,17 @@ const nodeTypes = {
 
 type GraphCanvasProps = {
 	data?: GraphData;
+	connectionPath?: GraphPathResponse;
 	isLoading: boolean;
 	isError: boolean;
 	selectedNodeId: string | null;
 	onNodeSelect: (nodeId: string | null) => void;
 };
 
-function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError }: GraphCanvasProps) {
+function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError, connectionPath }: GraphCanvasProps) {
+	const connectionNodeIds = useMemo(() => new Set(connectionPath?.connected ? connectionPath.nodes.map((node) => node.id) : []), [connectionPath]);
+	const connectionRelationshipIds = useMemo(() => new Set(connectionPath?.connected ? connectionPath.relationships.map((relationship) => relationship.id) : []), [connectionPath]);
+
 	const graph = useMemo(() => {
 		if (!data) {
 			return {
@@ -88,39 +93,51 @@ function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError }:
 			};
 		}
 
-		const nodes: Node[] = data.nodes.map((node) => ({
-			id: node.id,
-			type: "graphNode",
-			data: {
-				label: node.name,
-				type: node.type,
-			},
-			position: {
-				x: 0,
-				y: 0,
-			},
-			sourcePosition: Position.Right,
-			targetPosition: Position.Left,
-			style: {
-				opacity: selectedNodeId && selectedNodeId !== node.id ? 0.35 : 1,
-			},
-		}));
+		const nodes: Node[] = data.nodes.map((node) => {
+			// const isConnectionNode = connectionNodeIds.has(node.id);
 
-		const edges: Edge[] = data.relationships.map((relationship) => ({
-			id: relationship.id,
+			return {
+				id: node.id,
+				type: "graphNode",
+				data: {
+					label: node.name,
+					type: node.type,
+					isConnectionPath: connectionNodeIds.has(node.id),
+				},
+				position: {
+					x: 0,
+					y: 0,
+				},
+				sourcePosition: Position.Right,
+				targetPosition: Position.Left,
+				style: {
+					opacity: selectedNodeId && selectedNodeId !== node.id ? 0.5 : 1,
+				},
+			};
+		});
 
-			source: relationship.source,
-			target: relationship.target,
-
-			label: relationship.type,
-
-			markerEnd: {
-				type: MarkerType.ArrowClosed,
-			},
-		}));
+		const edges: Edge[] = data.relationships.map((relationship) => {
+			const isConnectionRelationship = connectionRelationshipIds.has(relationship.id);
+			return {
+				id: relationship.id,
+				source: relationship.source,
+				target: relationship.target,
+				label: relationship.type,
+				markerEnd: {
+					type: MarkerType.ArrowClosed,
+					color: isConnectionRelationship ? "#22c55e" : undefined,
+				},
+				style: {
+					stroke: isConnectionRelationship ? "#22c55e" : undefined,
+					strokeWidth: isConnectionRelationship ? 2 : 1,
+					strokeDasharray: isConnectionRelationship ? "0px, 4px" : undefined,
+					strokeLinecap: isConnectionRelationship ? "round" : undefined,
+				},
+			};
+		});
 
 		return getLayoutedElements(nodes, edges);
-	}, [data, selectedNodeId]);
+	}, [data, connectionNodeIds, connectionRelationshipIds, selectedNodeId]);
 
 	if (isLoading) {
 		return (
@@ -136,7 +153,7 @@ function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError }:
 			>
 				<CircularProgress size={28} />
 
-				<Typography color="text.secondary">Loading graph...</Typography>
+				<Typography color="text.secondary">{connectionPath ? "Finding connection..." : "Loading graph..."}</Typography>
 			</Box>
 		);
 	}
@@ -173,7 +190,12 @@ function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError }:
 	}
 
 	return (
-		<Box sx={{ width: "100%", height: "100%" }}>
+		<Box
+			sx={{
+				width: "100%",
+				height: "100%",
+			}}
+		>
 			<ReactFlow
 				nodes={graph.nodes}
 				edges={graph.edges}
@@ -191,7 +213,6 @@ function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError }:
 			>
 				<Background />
 				<Controls />
-				<MiniMap nodeStrokeWidth={3} pannable zoomable />
 			</ReactFlow>
 		</Box>
 	);

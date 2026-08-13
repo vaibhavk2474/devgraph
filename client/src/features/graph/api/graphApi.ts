@@ -28,6 +28,12 @@ export type GraphSearchResponse = {
     results: GraphSearchResult[];
 };
 
+export type GraphPathResponse = {
+    connected: boolean;
+    nodes: GraphNode[];
+    relationships: GraphRelationship[];
+};
+
 export const graphApi = createApi({
     reducerPath: "graphApi",
 
@@ -50,9 +56,21 @@ export const graphApi = createApi({
         getFocusedGraph: builder.query<GraphData, string>({
             query: (nodeId) => `/graph/${nodeId}`,
         }),
+        findGraphPath: builder.query<
+            GraphPathResponse,
+            { from: string; to: string }
+        >({
+            query: ({ from, to }) => ({
+                url: "/graph/path",
+                params: {
+                    from,
+                    to,
+                },
+            }),
+        }),
     }),
 
 
 });
 
-export const { useGetGraphQuery, useSearchGraphQuery, useGetFocusedGraphQuery, useLazyGetFocusedGraphQuery } = graphApi;
+export const { useGetGraphQuery, useSearchGraphQuery, useGetFocusedGraphQuery, useLazyGetFocusedGraphQuery, useLazyFindGraphPathQuery } = graphApi;

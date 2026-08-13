@@ -131,3 +131,77 @@ export async function getFocusedGraph(nodeId: string) {
         relationships: Array.from(relationships.values()),
     };
 }
+
+export async function findGraphPath(
+    fromId: string,
+    toId: string,
+) {
+    const result = await driver.executeQuery(
+        `
+		MATCH (from {id: $fromId}), (to {id: $toId})
+
+		OPTIONAL MATCH path =
+			shortestPath((from)-[*..5]-(to))
+
+		RETURN path
+		`,
+        {
+            fromId,
+            toId,
+        },
+    );
+
+    const record = result.records[0];
+    const path = record?.get("path");
+
+    if (!path) {
+        return {
+            connected: false,
+            nodes: [],
+            relationships: [],
+        };
+    }
+
+    const nodesMap = new Map<
+        string,
+        Record<string, unknown>
+    >();
+
+    const relationshipsMap = new Map<
+        string,
+        Record<string, unknown>
+    >();
+
+    for (const node of path.segments.flatMap((segment: any) => [
+        segment.start,
+        segment.end,
+    ])) {
+        nodesMap.set(node.properties.id, {
+            id: node.properties.id,
+            type: node.labels[0],
+            ...node.properties,
+        });
+    }
+
+    for (const segment of path.segments) {
+        const relationship = segment.relationship;
+
+        relationshipsMap.set(
+            relationship.elementId,
+            {
+                id: relationship.elementId,
+                type: relationship.type,
+                source: segment.start.properties.id,
+                target: segment.end.properties.id,
+            },
+        );
+    }
+
+    return {
+        connected: true,
+        nodes: Array.from(nodesMap.values()),
+        relationships: Array.from(
+            relationshipsMap.values(),
+        ),
+    };
+}

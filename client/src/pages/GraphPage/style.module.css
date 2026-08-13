@@ -19,7 +19,10 @@
 	flex: 1;
 	min-height: 0;
 	display: grid;
-	grid-template-columns: 220px minmax(0, 1fr) 300px;
+	grid-template-columns: minmax(0, 1fr) 300px;
+}
+.content.connectionMode {
+	grid-template-columns: 250px minmax(0, 1fr) 300px;
 }
 
 .sidebar {
@@ -43,9 +46,18 @@
 	background: #ffffff;
 }
 
+.graphWrapper {
+	flex: 1;
+	min-height: 0;
+	margin-top: 12px;
+}
+
 @media (max-width: 1000px) {
 	.content {
-		grid-template-columns: 180px minmax(0, 1fr);
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.content.connectionMode {
+		grid-template-columns: 250px minmax(0, 1fr);
 	}
 
 	.details {

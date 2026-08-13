@@ -60,3 +60,8 @@
 .technology .type {
 	color: #ea580c;
 }
+
+.connectionPath {
+	border: 2px dotted #22c55e;
+	background: rgba(34, 197, 94, 0.06);
+}

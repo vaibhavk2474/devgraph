@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getFocusedGraph, getGraph, searchGraph } from "../services/graph.service.js";
+import { findGraphPath, getFocusedGraph, getGraph, searchGraph } from "../services/graph.service.js";
 
 const router = Router();
 
@@ -35,6 +35,43 @@ router.get("/search", async (req, res, next) => {
         return res.json({
             results,
         });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/path", async (req, res, next) => {
+    try {
+        const from =
+            typeof req.query.from === "string"
+                ? req.query.from.trim()
+                : "";
+
+        const to =
+            typeof req.query.to === "string"
+                ? req.query.to.trim()
+                : "";
+
+        if (!from || !to) {
+            return res.status(400).json({
+                message:
+                    "Both from and to are required",
+            });
+        }
+
+        if (from === to) {
+            return res.status(400).json({
+                message:
+                    "Source and target must be different",
+            });
+        }
+
+        const result = await findGraphPath(
+            from,
+            to,
+        );
+
+        return res.json(result);
     } catch (error) {
         next(error);
     }

@@ -1,18 +1,30 @@
-import { useState } from "react";
-import { Typography } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Box, Button, Typography } from "@mui/material";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 
-import { type GraphData, useGetFocusedGraphQuery, useLazyGetFocusedGraphQuery } from "../../features/graph/api/graphApi";
+import { type GraphData, useGetFocusedGraphQuery, useLazyGetFocusedGraphQuery, useLazyFindGraphPathQuery } from "../../features/graph/api/graphApi";
 
 import GraphCanvas from "../../features/graph/components/GraphCanvas";
 import NodeDetails from "../../features/graph/components/NodeDetails";
 
 import styles from "./style.module.css";
+import ConnectionSummary from "./ConnectionSummary";
+import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 
 function GraphPage() {
 	const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
 	const [exploredGraph, setExploredGraph] = useState<GraphData | null>(null);
+
 	const [exploredNodeIds, setExploredNodeIds] = useState<Set<string>>(new Set());
+
+	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
+
+	const fromId = searchParams.get("from");
+	const toId = searchParams.get("to");
+
+	const isConnectionMode = Boolean(fromId && toId);
 
 	const { nodeId } = useParams<{ nodeId: string }>();
 
@@ -22,12 +34,26 @@ function GraphPage() {
 
 	const [triggerFocusedGraph] = useLazyGetFocusedGraphQuery();
 
-	/**
-	 * Initial graph comes from RTK Query.
-	 * Once the user explores another node,
-	 * exploredGraph contains the merged graph.
+	const [findGraphPath, { data: connectionPath, isFetching: isConnectionLoading, isError: isConnectionError }] = useLazyFindGraphPathQuery();
+
+	/*
+	 * Normal graph:
+	 *
+	 * data -> exploredGraph -> currentGraph
+	 *
+	 * Connection graph:
+	 *
+	 * connectionPath -> currentGraph
 	 */
-	const currentGraph = exploredGraph ?? data;
+	const currentGraph =
+		exploredGraph ??
+		data ??
+		(connectionPath?.connected
+			? {
+					nodes: connectionPath.nodes,
+					relationships: connectionPath.relationships,
+				}
+			: undefined);
 
 	const selectedNode = currentGraph?.nodes.find((node) => node.id === selectedNodeId);
 
@@ -37,12 +63,14 @@ function GraphPage() {
 
 			setExploredNodeIds((previous) => {
 				const next = new Set(previous);
+
 				next.add(nodeId);
+
 				return next;
 			});
 
 			setExploredGraph((previousGraph) => {
-				const baseGraph = previousGraph ?? data;
+				const baseGraph = previousGraph ?? currentGraph;
 
 				if (!baseGraph) {
 					return newGraph;
@@ -70,31 +98,46 @@ function GraphPage() {
 		}
 	};
 
+	useEffect(() => {
+		if (!isConnectionMode || !fromId || !toId) {
+			return;
+		}
+
+		findGraphPath({
+			from: fromId,
+			to: toId,
+		});
+	}, [fromId, toId, findGraphPath, isConnectionMode]);
+
 	return (
 		<div className={styles.page}>
 			<header className={styles.header}>
-				<Typography variant="h6" sx={{ fontWeight: 700 }}>
-					Developer Network Explorer
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+					<Button variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate("/")}>
+						Back
+					</Button>
+					<Typography variant="h6" sx={{ fontWeight: 700 }}>
+						Developer Network Explorer
+					</Typography>
+				</Box>
 
 				<Typography variant="body2" color="text.secondary">
-					Graph Explorer
+					{isConnectionMode ? "Connection Explorer" : "Graph Explorer"}
 				</Typography>
 			</header>
 
-			<div className={styles.content}>
-				<aside className={styles.sidebar}>
-					<Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-						Filters
-					</Typography>
-
-					<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-						Node filters will be added later.
-					</Typography>
-				</aside>
+			<div className={styles.content + (isConnectionMode ? ` ${styles.connectionMode}` : "")}>
+				{isConnectionMode && <aside className={styles.sidebar}>{isConnectionMode && <ConnectionSummary connectionPath={connectionPath} layout="vertical" />}</aside>}
 
 				<main className={styles.canvas}>
-					<GraphCanvas selectedNodeId={selectedNodeId} onNodeSelect={setSelectedNodeId} data={currentGraph} isLoading={isLoading} isError={isError} />
+					<GraphCanvas
+						selectedNodeId={selectedNodeId}
+						onNodeSelect={setSelectedNodeId}
+						data={currentGraph}
+						connectionPath={connectionPath}
+						isLoading={isLoading || isConnectionLoading}
+						isError={isError || isConnectionError}
+					/>
 				</main>
 
 				<aside className={styles.details}>
