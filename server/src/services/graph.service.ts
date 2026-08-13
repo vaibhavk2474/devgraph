@@ -39,3 +39,95 @@ export async function getGraph() {
         relationships,
     };
 }
+
+export async function searchGraph(query: string) {
+    const result = await driver.executeQuery(
+        `
+    MATCH (n)
+    WHERE
+      n.name IS NOT NULL
+      AND toLower(n.name) CONTAINS toLower($query)
+
+    RETURN n
+    ORDER BY n.name
+    LIMIT 20
+    `,
+        {
+            query,
+        },
+    );
+
+    return result.records.map((record) => {
+        const node = record.get("n");
+
+        return {
+            id: node.properties.id,
+            type: node.labels[0],
+            ...node.properties,
+        };
+    });
+}
+
+export async function getFocusedGraph(nodeId: string) {
+    const result = await driver.executeQuery(
+        `
+    MATCH (center {id: $nodeId})
+
+    OPTIONAL MATCH (center)-[r]-(connected)
+
+    RETURN
+        center,
+        r,
+        connected,
+        startNode(r) AS sourceNode,
+        endNode(r) AS targetNode
+    `,
+        {
+            nodeId,
+        },
+    );
+
+    const nodes = new Map<string, Record<string, unknown>>();
+    const relationships = new Map<
+        string,
+        Record<string, unknown>
+    >();
+
+    for (const record of result.records) {
+        const center = record.get("center");
+        const relationship = record.get("r");
+        const connected = record.get("connected");
+
+        const sourceNode = record.get("sourceNode");
+        const targetNode = record.get("targetNode");
+
+        if (center) {
+            nodes.set(center.properties.id, {
+                id: center.properties.id,
+                type: center.labels[0],
+                ...center.properties,
+            });
+        }
+
+        if (connected) {
+            nodes.set(connected.properties.id, {
+                id: connected.properties.id,
+                type: connected.labels[0],
+                ...connected.properties,
+            });
+        }
+
+        if (relationship && sourceNode && targetNode) {
+            relationships.set(relationship.elementId, {
+                id: relationship.elementId,
+                type: relationship.type,
+                source: sourceNode.properties.id,
+                target: targetNode.properties.id,
+            });
+        }
+    }
+    return {
+        nodes: Array.from(nodes.values()),
+        relationships: Array.from(relationships.values()),
+    };
+}

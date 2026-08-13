@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getGraph } from "../services/graph.service.js";
+import { getFocusedGraph, getGraph, searchGraph } from "../services/graph.service.js";
 
 const router = Router();
 
@@ -16,5 +16,42 @@ router.get("/", async (_req, res) => {
         });
     }
 });
+
+router.get("/search", async (req, res, next) => {
+    try {
+        const query =
+            typeof req.query.q === "string"
+                ? req.query.q.trim()
+                : "";
+
+        if (!query) {
+            return res.status(400).json({
+                message: "Search query is required",
+            });
+        }
+
+        const results = await searchGraph(query);
+
+        return res.json({
+            results,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+router.get("/:nodeId", async (req, res, next) => {
+    try {
+        const { nodeId } = req.params;
+
+        const graph = await getFocusedGraph(nodeId);
+
+        return res.json(graph);
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 export default router;

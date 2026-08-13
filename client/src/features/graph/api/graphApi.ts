@@ -2,9 +2,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export type GraphNode = {
     id: string;
-    type: string;
+    type: "Developer" | "Project" | "Company" | "Technology";
     name: string;
-    [key: string]: unknown;
+
+    role?: string;
+    description?: string;
+    category?: string;
 };
 
 export type GraphRelationship = {
@@ -19,6 +22,12 @@ export type GraphData = {
     relationships: GraphRelationship[];
 };
 
+export type GraphSearchResult = GraphNode;
+
+export type GraphSearchResponse = {
+    results: GraphSearchResult[];
+};
+
 export const graphApi = createApi({
     reducerPath: "graphApi",
 
@@ -30,7 +39,20 @@ export const graphApi = createApi({
         getGraph: builder.query<GraphData, void>({
             query: () => "/graph",
         }),
+        searchGraph: builder.query<GraphSearchResponse, string>({
+            query: (query) => ({
+                url: "/graph/search",
+                params: {
+                    q: query,
+                },
+            }),
+        }),
+        getFocusedGraph: builder.query<GraphData, string>({
+            query: (nodeId) => `/graph/${nodeId}`,
+        }),
     }),
+
+
 });
 
-export const { useGetGraphQuery } = graphApi;
+export const { useGetGraphQuery, useSearchGraphQuery, useGetFocusedGraphQuery, useLazyGetFocusedGraphQuery } = graphApi;

@@ -1,0 +1,62 @@
+.node {
+	width: 180px;
+	min-height: 64px;
+	padding: 10px 14px;
+	border: 1px solid;
+	border-radius: 10px;
+	background: #ffffff;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 4px;
+	box-sizing: border-box;
+}
+
+.type {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.label {
+	font-size: 14px;
+	font-weight: 600;
+	color: #0f172a;
+}
+
+.developer {
+	border-color: #60a5fa;
+	background: #eff6ff;
+}
+
+.developer .type {
+	color: #2563eb;
+}
+
+.project {
+	border-color: #a78bfa;
+	background: #f5f3ff;
+}
+
+.project .type {
+	color: #7c3aed;
+}
+
+.company {
+	border-color: #4ade80;
+	background: #f0fdf4;
+}
+
+.company .type {
+	color: #16a34a;
+}
+
+.technology {
+	border-color: #fb923c;
+	background: #fff7ed;
+}
+
+.technology .type {
+	color: #ea580c;
+}

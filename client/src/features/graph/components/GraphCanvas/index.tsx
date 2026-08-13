@@ -6,8 +6,9 @@ import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import "@xyflow/react/dist/style.css";
 
 import dagre from "@dagrejs/dagre";
+import GraphNode from "../GraphNode";
 
-import { useGetGraphQuery } from "../../api/graphApi";
+import type { GraphData } from "../../api/graphApi";
 
 const NODE_WIDTH = 180;
 const NODE_HEIGHT = 60;
@@ -66,9 +67,19 @@ function getLayoutedElements(
 	};
 }
 
-function GraphCanvas() {
-	const { data, isLoading, isError } = useGetGraphQuery();
+const nodeTypes = {
+	graphNode: GraphNode,
+};
 
+type GraphCanvasProps = {
+	data?: GraphData;
+	isLoading: boolean;
+	isError: boolean;
+	selectedNodeId: string | null;
+	onNodeSelect: (nodeId: string | null) => void;
+};
+
+function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError }: GraphCanvasProps) {
 	const graph = useMemo(() => {
 		if (!data) {
 			return {
@@ -79,18 +90,20 @@ function GraphCanvas() {
 
 		const nodes: Node[] = data.nodes.map((node) => ({
 			id: node.id,
-
+			type: "graphNode",
 			data: {
 				label: node.name,
+				type: node.type,
 			},
-
 			position: {
 				x: 0,
 				y: 0,
 			},
-
 			sourcePosition: Position.Right,
 			targetPosition: Position.Left,
+			style: {
+				opacity: selectedNodeId && selectedNodeId !== node.id ? 0.35 : 1,
+			},
 		}));
 
 		const edges: Edge[] = data.relationships.map((relationship) => ({
@@ -107,7 +120,7 @@ function GraphCanvas() {
 		}));
 
 		return getLayoutedElements(nodes, edges);
-	}, [data]);
+	}, [data, selectedNodeId]);
 
 	if (isLoading) {
 		return (
@@ -164,15 +177,20 @@ function GraphCanvas() {
 			<ReactFlow
 				nodes={graph.nodes}
 				edges={graph.edges}
+				nodeTypes={nodeTypes}
 				fitView
 				fitViewOptions={{
 					padding: 0.2,
 				}}
+				onNodeClick={(_, node) => {
+					onNodeSelect(node.id);
+				}}
+				onPaneClick={() => {
+					onNodeSelect(null);
+				}}
 			>
 				<Background />
-
 				<Controls />
-
 				<MiniMap nodeStrokeWidth={3} pannable zoomable />
 			</ReactFlow>
 		</Box>

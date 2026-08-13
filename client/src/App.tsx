@@ -8,6 +8,7 @@ function App() {
 			<Routes>
 				<Route path="/" element={<HomePage />} />
 				<Route path="/graph" element={<GraphPage />} />
+				<Route path="/graph/:nodeId" element={<GraphPage />} />
 			</Routes>
 		</BrowserRouter>
 	);
