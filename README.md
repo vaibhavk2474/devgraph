@@ -915,61 +915,7 @@ The UI includes loading and error handling around API/database operations and pr
 
 ---
 
-# 19. Screenshots
-
-> Replace the placeholders below with the final screenshots before submitting.
-
-## 19.1 Discovery / Home
-
-**[SCREENSHOT PLACEHOLDER — Home / Discovery page]**
-
-Suggested screenshot:
-
-- Hero section
-- Explore Network mode
-- Search field
-- Search results
-
----
-
-## 19.2 Graph Explorer
-
-**[SCREENSHOT PLACEHOLDER — Interactive graph explorer]**
-
-Suggested screenshot:
-
-- Multiple graph nodes
-- Relationships
-- Selected node
-- Node details panel
-
----
-
-## 19.3 One-Hop Exploration
-
-**[SCREENSHOT PLACEHOLDER — One-hop graph expansion]**
-
-Suggested screenshot:
-
-- Initial graph
-- Newly explored node/relationships
-- Details panel showing the selected entity
-
----
-
-## 19.4 Connection Finder
-
-**[SCREENSHOT PLACEHOLDER — Connection finder with highlighted path]**
-
-Suggested screenshot:
-
-- Two selected entities
-- Green highlighted connection path
-- Connection Summary sidebar
-
----
-
-# 20. Screen Recording
+# 19. Screen Recording
 
 **[SCREEN RECORDING URL — ADD BEFORE SUBMISSION]**
 
@@ -989,7 +935,7 @@ Recommended duration: approximately 2–3 minutes.
 
 ---
 
-# 21. Engineering Decisions
+# 20. Engineering Decisions
 
 ### Parameterized Cypher
 
@@ -1050,54 +996,15 @@ If this application were developed beyond the take-home scope, useful next steps
 - Automated backend and frontend tests.
 - Observability and structured production logging.
 
-These are intentionally outside the current assignment scope.
-
 ---
 
-# 23. Assignment Deliverables
-
-This repository is intended to provide the complete application requested in the Wexa AI take-home assignment:
-
-- [x] Full frontend source
-- [x] Full backend source
-- [x] CognoDB integration
-- [x] Seed/data-loading script
-- [x] Parameterized Cypher queries
-- [x] Multi-hop graph traversal
-- [x] Interactive web application
-- [x] Graph exploration
-- [x] Connection/path discovery
-- [x] Hosted application
-- [ ] Final screenshots
-- [ ] Final screen recording URL
-
-Before submission, replace the screenshot and recording placeholders above.
-
----
-
-# 24. Demo
+# 23. Demo
 
 **Live Application:**  
 https://devgraph-pi.vercel.app
 
 **Screen Recording:**  
 [ADD RECORDING URL]
-
----
-
-# 25. Submission
-
-Submit the GitHub repository and hosted demo information to:
-
-```text
-hr@wexa.ai
-```
-
-Suggested subject:
-
-```text
-CognoDB Assignment 2 – Vaibhav Kumar
-```
 
 ---
 
