@@ -40,43 +40,67 @@ The resulting path is:
 
 # 1.1. Screenshots
 
-> Find images related to assignment here.
+> Find images related to application here.
 
-## 19.1 Discovery / Home
+## 1.1 Discovery / Home
 
-![DevGraph Home](./screenshots/home.png)
-![DevGraph Home Find Connection](./screenshots/find-connection.png)
+![DevGraph Home](./screenshots/HomePage.png)
+<b>Discovery / Home</b>
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./screenshots/HomePage.png" width="450"/><br/>
+      <b>Explore Network Page</b>
+    </td>
+    <td align="center">
+      <img src="./screenshots/FindConnection.png" width="450"/><br/>
+      <b>Find Connection Page</b>
+    </td>
+    </tr>
+    <tr>
+    <td align="center">
+      <img src="./screenshots/HomeExploreEntity.png" width="450"/><br/>
+      <b>Explore Entity</b>
+    </td>
+    <td align="center">
+      <img src="./screenshots/HomeFindConnection.png" width="450"/><br/>
+      <b>Find Connection</b>
+    </td>
+  </tr>
+</table>
 
 screenshot:
 
 - Hero section
 - Explore Network mode
+- Find Connections
 - Search field
 - Search results
 
 ---
 
-## 19.2 Graph Explorer
+## 1.2 Graph Explorer
 
 <table>
   <tr>
     <td align="center">
-      <img src="./screenshots/explore_01.png" width="450"/><br/>
-      <b>Discovery / Home</b>
+      <img src="./screenshots/HomeExploreEntity.png" width="450"/><br/>
+      <b>Seach Entity</b>
     </td>
     <td align="center">
-      <img src="./screenshots/explore_02.png" width="450"/><br/>
-      <b>highlight entity</b>
+      <img src="./screenshots/GraphExploreEntity.png" width="450"/><br/>
+      <b>Explore Entity</b>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="./screenshots/explore_03.png" width="450"/><br/>
-      <b>select entity, get details</b>
+      <img src="./screenshots/GraphExploreSelectEntity.png" width="450"/><br/>
+      <b>select any entity and get details</b>
     </td>
     <td align="center">
-      <img src="./screenshots/explore_04.png" width="450"/><br/>
-      <b>select entity, get details</b>
+      <img src="./screenshots/GraphExploreConnectionExplore.png" width="450"/><br/>
+      <b>selected entity explored</b>
     </td>
   </tr>
 </table>
@@ -90,23 +114,32 @@ Suggested screenshot:
 
 ---
 
-## 19.3 One-Hop Exploration
+## 1.3 Connection Finder
 
-**[SCREENSHOT PLACEHOLDER — One-hop graph expansion]**
+<table>
+  <tr>
+    <td align="center">
+      <img src="./screenshots/ConnectionExploreHomePage.png" width="450"/><br/>
+      <b>Type Two Entities </b>
+    </td>
+    <td align="center">
+      <img src="./screenshots/ConnectionExplore.png" width="450"/><br/>
+      <b>Found Connection</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./screenshots/ConnectionExploreDetails.png" width="450"/><br/>
+      <b>select any entity and get details</b>
+    </td>
+    <td align="center">
+      <img src="./screenshots/ConnectionExploreEntityExplore.png" width="450"/><br/>
+      <b>selected entity explored</b>
+    </td>
+  </tr>
+</table>
 
-Suggested screenshot:
-
-- Initial graph
-- Newly explored node/relationships
-- Details panel showing the selected entity
-
----
-
-## 19.4 Connection Finder
-
-**[SCREENSHOT PLACEHOLDER — Connection finder with highlighted path]**
-
-Suggested screenshot:
+screenshot:
 
 - Two selected entities
 - Green highlighted connection path
