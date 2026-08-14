@@ -928,6 +928,8 @@ The recording demonstrates:
 7. Selecting two entities.
 8. Finding their connection.
 9. Viewing the highlighted path and connection summary.
+10. exploring relationships
+11. checking Mobile view
 
 Recommended duration: approximately 2–3 minutes.
 
