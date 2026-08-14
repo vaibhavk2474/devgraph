@@ -1,28 +1,20 @@
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { DeveloperNode, ProjectNode, CompanyNode, TechnologyNode, ConnectionNode, Type, Label } from "./style";
 
-import styles from "./style.module.css";
-
-type GraphNodeData = {
-	label: string;
-	type: string;
-	isConnectionPath?: boolean;
-};
-
+type GraphNodeData = { label: string; type: string; isConnectionPath?: boolean };
 type GraphNodeType = Node<GraphNodeData>;
 
 function GraphNode({ data }: NodeProps<GraphNodeType>) {
 	const nodeType = data.type.toLowerCase();
+	const BaseNode = data.isConnectionPath ? ConnectionNode : nodeType === "developer" ? DeveloperNode : nodeType === "project" ? ProjectNode : nodeType === "company" ? CompanyNode : TechnologyNode;
 
 	return (
-		<div className={`${styles.node} ${styles[nodeType]} ${data.isConnectionPath ? styles.connectionPath : ""}`}>
+		<BaseNode>
 			<Handle type="target" position={Position.Left} />
-
-			<div className={styles.type}>{data.type}</div>
-
-			<div className={styles.label}>{data.label}</div>
-
+			<Type className="graph-node-type">{data.type}</Type>
+			<Label>{data.label}</Label>
 			<Handle type="source" position={Position.Right} />
-		</div>
+		</BaseNode>
 	);
 }
 

@@ -1,12 +1,11 @@
 import { useMemo } from "react";
 import { ReactFlow, Background, Controls, MarkerType, Position, type Node, type Edge } from "@xyflow/react";
 
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
-
 import "@xyflow/react/dist/style.css";
 
 import dagre from "@dagrejs/dagre";
 import GraphNode from "../GraphNode";
+import { Canvas, StateContainer, ErrorContainer, StateText, GraphError, LoadingSpinner } from "./style";
 
 import type { GraphData, GraphPathResponse } from "../../api/graphApi";
 
@@ -141,61 +140,31 @@ function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError, c
 
 	if (isLoading) {
 		return (
-			<Box
-				sx={{
-					height: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					flexDirection: "column",
-					gap: 1,
-				}}
-			>
-				<CircularProgress size={28} />
-
-				<Typography color="text.secondary">{connectionPath ? "Finding connection..." : "Loading graph..."}</Typography>
-			</Box>
+			<StateContainer>
+				<LoadingSpinner size={28} />
+				<StateText color="text.secondary">{connectionPath ? "Finding connection..." : "Loading graph..."}</StateText>
+			</StateContainer>
 		);
 	}
 
 	if (isError) {
 		return (
-			<Box
-				sx={{
-					height: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					p: 3,
-				}}
-			>
-				<Alert severity="error">Unable to load graph data.</Alert>
-			</Box>
+			<ErrorContainer>
+				<GraphError severity="error">Unable to load graph data.</GraphError>
+			</ErrorContainer>
 		);
 	}
 
 	if (!data || data.nodes.length === 0) {
 		return (
-			<Box
-				sx={{
-					height: "100%",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-				}}
-			>
-				<Typography color="text.secondary">No graph data available.</Typography>
-			</Box>
+			<StateContainer>
+				<StateText color="text.secondary">No graph data available.</StateText>
+			</StateContainer>
 		);
 	}
 
 	return (
-		<Box
-			sx={{
-				width: "100%",
-				height: "100%",
-			}}
-		>
+		<Canvas>
 			<ReactFlow
 				nodes={graph.nodes}
 				edges={graph.edges}
@@ -214,7 +183,7 @@ function GraphCanvas({ selectedNodeId, onNodeSelect, data, isLoading, isError, c
 				<Background />
 				<Controls />
 			</ReactFlow>
-		</Box>
+		</Canvas>
 	);
 }
 

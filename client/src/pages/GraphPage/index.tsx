@@ -1,29 +1,46 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { Drawer, useMediaQuery, useTheme } from "@mui/material";
+import { ArrowBack as ArrowBackIcon, AccountTreeOutlined as AccountTreeOutlinedIcon, InfoOutlined as InfoOutlinedIcon, Close as CloseIcon } from "@mui/icons-material";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { type GraphData, useGetFocusedGraphQuery, useLazyGetFocusedGraphQuery, useLazyFindGraphPathQuery } from "../../features/graph/api/graphApi";
-
 import GraphCanvas from "../../features/graph/components/GraphCanvas";
 import NodeDetails from "../../features/graph/components/NodeDetails";
 
-import styles from "./style.module.css";
+import {
+	Page,
+	Header,
+	HeaderLeft,
+	BackButton,
+	HeaderTitle,
+	HeaderSubtitle,
+	HeaderActions,
+	HeaderActionButton,
+	Content,
+	Sidebar,
+	Canvas,
+	Details,
+	DrawerContent,
+	DrawerCloseRow,
+	DrawerCloseButton,
+	HeaderRight,
+} from "./style";
 import ConnectionSummary from "./ConnectionSummary";
-import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 
 function GraphPage() {
 	const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-
 	const [exploredGraph, setExploredGraph] = useState<GraphData | null>(null);
-
 	const [exploredNodeIds, setExploredNodeIds] = useState<Set<string>>(new Set());
+	const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
+	const [connectionDrawerOpen, setConnectionDrawerOpen] = useState(false);
 
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
+	const theme = useTheme();
+	const isCompact = useMediaQuery(theme.breakpoints.down("lg"));
 
 	const fromId = searchParams.get("from");
 	const toId = searchParams.get("to");
-
 	const isConnectionMode = Boolean(fromId && toId);
 
 	const { nodeId } = useParams<{ nodeId: string }>();
@@ -33,18 +50,8 @@ function GraphPage() {
 	});
 
 	const [triggerFocusedGraph] = useLazyGetFocusedGraphQuery();
-
 	const [findGraphPath, { data: connectionPath, isFetching: isConnectionLoading, isError: isConnectionError }] = useLazyFindGraphPathQuery();
 
-	/*
-	 * Normal graph:
-	 *
-	 * data -> exploredGraph -> currentGraph
-	 *
-	 * Connection graph:
-	 *
-	 * connectionPath -> currentGraph
-	 */
 	const currentGraph =
 		exploredGraph ??
 		data ??
@@ -57,15 +64,26 @@ function GraphPage() {
 
 	const selectedNode = currentGraph?.nodes.find((node) => node.id === selectedNodeId);
 
-	const handleExploreNode = async (nodeId: string) => {
+	const handleNodeSelect = (nextNodeId: string | null) => {
+		setSelectedNodeId(nextNodeId);
+
+		if (isCompact) {
+			setDetailsDrawerOpen(Boolean(nextNodeId));
+		}
+	};
+
+	const handleDetailsClose = () => {
+		setSelectedNodeId(null);
+		setDetailsDrawerOpen(false);
+	};
+
+	const handleExploreNode = async (nextNodeId: string) => {
 		try {
-			const newGraph = await triggerFocusedGraph(nodeId).unwrap();
+			const newGraph = await triggerFocusedGraph(nextNodeId).unwrap();
 
 			setExploredNodeIds((previous) => {
 				const next = new Set(previous);
-
-				next.add(nodeId);
-
+				next.add(nextNodeId);
 				return next;
 			});
 
@@ -110,49 +128,99 @@ function GraphPage() {
 	}, [fromId, toId, findGraphPath, isConnectionMode]);
 
 	return (
-		<div className={styles.page}>
-			<header className={styles.header}>
-				<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-					<Button variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate("/")}>
+		<Page>
+			<Header>
+				<HeaderLeft>
+					<BackButton variant="text" startIcon={<ArrowBackIcon />} onClick={() => navigate("/")}>
 						Back
-					</Button>
-					<Typography variant="h6" sx={{ fontWeight: 700 }}>
-						Developer Network Explorer
-					</Typography>
-				</Box>
+					</BackButton>
+					<HeaderTitle as="h1">Developer Network Explorer</HeaderTitle>
+				</HeaderLeft>
 
-				<Typography variant="body2" color="text.secondary">
-					{isConnectionMode ? "Connection Explorer" : "Graph Explorer"}
-				</Typography>
-			</header>
+				<HeaderRight>
+					<HeaderSubtitle as="span">{isConnectionMode ? "Connection Explorer" : "Graph Explorer"}</HeaderSubtitle>
+					{isCompact && (
+						<HeaderActions>
+							{isConnectionMode && (
+								<HeaderActionButton size="small" variant="outlined" startIcon={<AccountTreeOutlinedIcon />} onClick={() => setConnectionDrawerOpen(true)}>
+									Connection found
+								</HeaderActionButton>
+							)}
+							{selectedNode && (
+								<HeaderActionButton size="small" variant="outlined" startIcon={<InfoOutlinedIcon />} onClick={() => setDetailsDrawerOpen(true)}>
+									Details
+								</HeaderActionButton>
+							)}
+						</HeaderActions>
+					)}
+				</HeaderRight>
+			</Header>
 
-			<div className={styles.content + (isConnectionMode ? ` ${styles.connectionMode}` : "")}>
-				{isConnectionMode && <aside className={styles.sidebar}>{isConnectionMode && <ConnectionSummary connectionPath={connectionPath} layout="vertical" />}</aside>}
+			<Content connection={isConnectionMode} compact={isCompact}>
+				{isConnectionMode && !isCompact && (
+					<Sidebar>
+						<ConnectionSummary connectionPath={connectionPath} layout="vertical" />
+					</Sidebar>
+				)}
 
-				<main className={styles.canvas}>
+				<Canvas>
 					<GraphCanvas
 						selectedNodeId={selectedNodeId}
-						onNodeSelect={setSelectedNodeId}
+						onNodeSelect={handleNodeSelect}
 						data={currentGraph}
 						connectionPath={connectionPath}
 						isLoading={isLoading || isConnectionLoading}
 						isError={isError || isConnectionError}
 					/>
-				</main>
+				</Canvas>
 
-				<aside className={styles.details}>
-					<NodeDetails
-						node={selectedNode}
-						nodes={currentGraph?.nodes ?? []}
-						relationships={currentGraph?.relationships ?? []}
-						onClose={() => setSelectedNodeId(null)}
-						onNodeSelect={setSelectedNodeId}
-						onExploreNode={handleExploreNode}
-						exploredNodeIds={exploredNodeIds}
-					/>
-				</aside>
-			</div>
-		</div>
+				{!isCompact && (
+					<Details>
+						<NodeDetails
+							node={selectedNode}
+							nodes={currentGraph?.nodes ?? []}
+							relationships={currentGraph?.relationships ?? []}
+							onClose={handleDetailsClose}
+							onNodeSelect={handleNodeSelect}
+							onExploreNode={handleExploreNode}
+							exploredNodeIds={exploredNodeIds}
+						/>
+					</Details>
+				)}
+			</Content>
+
+			{isCompact && (
+				<>
+					<Drawer anchor="right" open={detailsDrawerOpen} onClose={handleDetailsClose} slotProps={{ paper: { component: DrawerContent } }}>
+						{/* <DrawerCloseRow>
+							<DrawerCloseButton onClick={handleDetailsClose} aria-label="Close details">
+								<CloseIcon />
+							</DrawerCloseButton>
+						</DrawerCloseRow> */}
+						<NodeDetails
+							node={selectedNode}
+							nodes={currentGraph?.nodes ?? []}
+							relationships={currentGraph?.relationships ?? []}
+							onClose={handleDetailsClose}
+							onNodeSelect={handleNodeSelect}
+							onExploreNode={handleExploreNode}
+							exploredNodeIds={exploredNodeIds}
+						/>
+					</Drawer>
+
+					{isConnectionMode && (
+						<Drawer anchor="left" open={connectionDrawerOpen} onClose={() => setConnectionDrawerOpen(false)} slotProps={{ paper: { component: DrawerContent } }}>
+							<DrawerCloseRow>
+								<DrawerCloseButton onClick={() => setConnectionDrawerOpen(false)} aria-label="Close connection summary">
+									<CloseIcon />
+								</DrawerCloseButton>
+							</DrawerCloseRow>
+							<ConnectionSummary connectionPath={connectionPath} layout="vertical" />
+						</Drawer>
+					)}
+				</>
+			)}
+		</Page>
 	);
 }
 

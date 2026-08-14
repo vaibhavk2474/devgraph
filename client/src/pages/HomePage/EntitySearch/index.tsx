@@ -1,9 +1,9 @@
 import { Box, CircularProgress, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useState } from "react";
-
 import type { SelectedEntity } from "..";
 import { useSearchGraphQuery } from "../../../features/graph/api/graphApi";
+import { Results, EmptyText, ResultItem, ResultName } from "./style";
 
 type EntitySearchProps = {
 	placeholder: string;
@@ -12,12 +12,8 @@ type EntitySearchProps = {
 
 function EntitySearch({ placeholder, onSelect }: EntitySearchProps) {
 	const [query, setQuery] = useState("");
-
 	const trimmedQuery = query.trim();
-
-	const { data, isLoading, isFetching } = useSearchGraphQuery(trimmedQuery, {
-		skip: trimmedQuery.length < 2,
-	});
+	const { data, isLoading, isFetching } = useSearchGraphQuery(trimmedQuery, { skip: trimmedQuery.length < 2 });
 
 	const handleSelect = (entity: SelectedEntity) => {
 		onSelect(entity);
@@ -38,51 +34,29 @@ function EntitySearch({ placeholder, onSelect }: EntitySearchProps) {
 								<SearchIcon />
 							</InputAdornment>
 						),
-						endAdornment:
-							isLoading || isFetching ? (
-								<InputAdornment position="end">
-									<CircularProgress size={20} />
-								</InputAdornment>
-							) : null,
+						endAdornment: isLoading || isFetching ? (
+							<InputAdornment position="end">
+								<CircularProgress size={20} />
+							</InputAdornment>
+						) : null,
 					},
 				}}
 			/>
 
 			{trimmedQuery.length >= 2 && (
-				<Box sx={{ mt: 1 }}>
+				<Results>
 					{!isLoading && !isFetching && data?.results.length === 0 && (
-						<Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-							No matching entities found.
-						</Typography>
+						<EmptyText variant="body2" color="text.secondary">No matching entities found.</EmptyText>
 					)}
-
 					<Stack spacing={1}>
 						{data?.results.map((result) => (
-							<Box
-								key={result.id}
-								onClick={() => handleSelect(result)}
-								sx={{
-									p: 1.5,
-									border: "1px solid",
-									borderColor: "divider",
-									borderRadius: 2,
-									cursor: "pointer",
-									transition: "background-color 0.15s ease, border-color 0.15s ease",
-									"&:hover": {
-										backgroundColor: "action.hover",
-										borderColor: "primary.main",
-									},
-								}}
-							>
-								<Typography sx={{ fontWeight: 600 }}>{result.name}</Typography>
-
-								<Typography variant="body2" color="text.secondary">
-									{result.type}
-								</Typography>
-							</Box>
+							<ResultItem key={result.id} onClick={() => handleSelect(result)}>
+								<ResultName>{result.name}</ResultName>
+								<Typography variant="body2" color="text.secondary">{result.type}</Typography>
+							</ResultItem>
 						))}
 					</Stack>
-				</Box>
+				</Results>
 			)}
 		</Box>
 	);

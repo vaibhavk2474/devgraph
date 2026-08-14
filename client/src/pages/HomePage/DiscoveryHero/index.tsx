@@ -1,44 +1,24 @@
-import { Box, Typography } from "@mui/material";
 import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
-
-import styles from "./style.module.css";
+import { Hero, Badge, BadgeText, Title, Description } from "./style";
 
 function DiscoveryHero() {
 	return (
-		<Box className={styles.hero}>
-			<Box className={styles.badge}>
+		<Hero>
+			<Badge>
 				<HubOutlinedIcon fontSize="small" />
+				<BadgeText variant="body2">Developer Network</BadgeText>
+			</Badge>
 
-				<Typography variant="body2" sx={{ fontWeight: 600 }}>
-					Developer Network
-				</Typography>
-			</Box>
-
-			<Typography
-				variant="h2"
-				sx={{
-					fontWeight: 800,
-					fontSize: "2.5rem",
-				}}
-			>
+			<Title variant="h2">
 				Discover how your
 				<br />
 				engineering network connects.
-			</Typography>
+			</Title>
 
-			<Typography
-				color="text.secondary"
-				sx={{
-					maxWidth: "650px",
-					margin: "16px auto 0",
-					fontSize: "1rem",
-					lineHeight: 1.6,
-					marginTop: "16px",
-				}}
-			>
+			<Description color="text.secondary">
 				Explore developers, projects, companies and technologies, or find the connection between any two entities.
-			</Typography>
-		</Box>
+			</Description>
+		</Hero>
 	);
 }
 

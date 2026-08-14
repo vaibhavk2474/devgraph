@@ -1,31 +1,49 @@
 import { useState } from "react";
-import { Alert, Box, Button, Divider, Stack, Typography, CircularProgress } from "@mui/material";
+import { Box, Button, Typography, CircularProgress, Alert } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 
 import EntitySearch from "../EntitySearch";
-
-import styles from "./style.module.css";
+import {
+	Title,
+	Description,
+	Fields,
+	Field,
+	Label,
+	Arrow,
+	ResponsiveDivider,
+	ErrorAlert,
+	Result,
+	ResultTitle,
+	ResultDescription,
+	Path,
+	PathNode,
+	PathNodeContent,
+	PathNodeName,
+	PathArrow,
+	SelectedEntity,
+	SelectedEntityContent,
+	SelectedEntityName,
+	ChangeButton,
+} from "./style";
 import { useLazyFindGraphPathQuery } from "../../../features/graph/api/graphApi";
-import type { SelectedEntity } from "..";
+import type { SelectedEntity as SelectedEntityType } from "..";
 
 function ConnectionMode() {
-	const [fromEntity, setFromEntity] = useState<SelectedEntity | null>(null);
-
-	const [toEntity, setToEntity] = useState<SelectedEntity | null>(null);
+	const [fromEntity, setFromEntity] = useState<SelectedEntityType | null>(null);
+	const [toEntity, setToEntity] = useState<SelectedEntityType | null>(null);
 
 	const [findGraphPath, { data: pathResult, isFetching, isError, reset }] = useLazyFindGraphPathQuery();
-
 	const navigate = useNavigate();
 
 	const canFindConnection = Boolean(fromEntity) && Boolean(toEntity) && fromEntity?.id !== toEntity?.id;
 
-	const handleFromSelect = (entity: SelectedEntity) => {
+	const handleFromSelect = (entity: SelectedEntityType) => {
 		setFromEntity(entity);
 		reset();
 	};
 
-	const handleToSelect = (entity: SelectedEntity) => {
+	const handleToSelect = (entity: SelectedEntityType) => {
 		setToEntity(entity);
 		reset();
 	};
@@ -49,134 +67,82 @@ function ConnectionMode() {
 
 	return (
 		<Box>
-			<Typography variant="h5" className={styles.title}>
-				Find a connection
-			</Typography>
-
-			<Typography variant="body2" color="text.secondary" className={styles.description}>
+			<Title variant="h5">Find a connection</Title>
+			<Description variant="body2" color="text.secondary">
 				Choose two entities and discover the shortest connection between them.
-			</Typography>
+			</Description>
 
-			<Stack
-				className={styles.fields}
-				sx={{
-					flexDirection: { xs: "column", md: "row" },
-					gap: 2,
-					alignItems: "stretch",
-				}}
-			>
-				<Box className={styles.field}>
-					<Typography variant="caption" color="text.secondary" className={styles.label}>
-						First entity
-					</Typography>
-
+			<Fields>
+				<Field>
+					<Label variant="caption" color="text.secondary">First entity</Label>
 					{fromEntity ? <SelectedEntityCard entity={fromEntity} onClear={() => setFromEntity(null)} /> : <EntitySearch placeholder="Search first entity..." onSelect={handleFromSelect} />}
-				</Box>
+				</Field>
 
-				<Box className={styles.arrow}>
-					<ArrowForwardIcon />
-				</Box>
+				<Arrow><ArrowForwardIcon /></Arrow>
 
-				<Box className={styles.field}>
-					<Typography variant="caption" color="text.secondary" className={styles.label}>
-						Second entity
-					</Typography>
-
+				<Field>
+					<Label variant="caption" color="text.secondary">Second entity</Label>
 					{toEntity ? <SelectedEntityCard entity={toEntity} onClear={() => setToEntity(null)} /> : <EntitySearch placeholder="Search second entity..." onSelect={handleToSelect} />}
-				</Box>
-			</Stack>
+				</Field>
+			</Fields>
 
-			<Divider sx={{ my: 3 }} />
+			<ResponsiveDivider />
 
-			<Button
-				fullWidth
-				variant="contained"
-				size="large"
-				disabled={!canFindConnection || isFetching}
-				endIcon={isFetching ? <CircularProgress size={18} color="inherit" /> : <ArrowForwardIcon />}
-				onClick={handleFindConnection}
-			>
+			<Button fullWidth variant="contained" size="large" disabled={!canFindConnection || isFetching} endIcon={isFetching ? <CircularProgress size={18} color="inherit" /> : <ArrowForwardIcon />} onClick={handleFindConnection}>
 				{isFetching ? "Finding connection..." : "Find connection"}
 			</Button>
 
-			{isError && (
-				<Alert severity="error" sx={{ mt: 2 }}>
-					Unable to find a connection. Please try again.
-				</Alert>
-			)}
+			{isError && <ErrorAlert><Alert severity="error">Unable to find a connection. Please try again.</Alert></ErrorAlert>}
 
 			{pathResult && (
-				<Box className={styles.result}>
+				<Result>
 					{pathResult.connected ? (
 						<>
-							<Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-								Connection found
-							</Typography>
-
-							<Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-								These entities are connected through {pathResult.relationships.length} relationship
-								{pathResult.relationships.length !== 1 ? "s" : ""}.
-							</Typography>
-
-							<Stack spacing={1} sx={{ mt: 2 }}>
+							<ResultTitle variant="subtitle1">Connection found</ResultTitle>
+							<ResultDescription variant="body2" color="text.secondary">
+								These entities are connected through {pathResult.relationships.length} relationship{pathResult.relationships.length !== 1 ? "s" : ""}.
+							</ResultDescription>
+							<Path spacing={1}>
 								{pathResult.nodes.map((node, index) => (
-									<Box key={node.id} className={styles.pathNode}>
-										<Box>
-											<Typography
-												sx={{
-													fontWeight: 600,
-												}}
-											>
-												{node.name}
-											</Typography>
-
-											<Typography variant="caption" color="text.secondary">
-												{node.type}
-											</Typography>
-										</Box>
-
-										{index < pathResult.nodes.length - 1 && <ArrowForwardIcon className={styles.pathArrow} />}
-									</Box>
+									<PathNode key={node.id}>
+										<PathNodeContent>
+											<PathNodeName>{node.name}</PathNodeName>
+											<Typography variant="caption" color="text.secondary">{node.type}</Typography>
+										</PathNodeContent>
+										{index < pathResult.nodes.length - 1 && <PathArrow><ArrowForwardIcon /></PathArrow>}
+									</PathNode>
 								))}
-							</Stack>
+							</Path>
 						</>
 					) : (
 						<>
-							<Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-								No connection found
-							</Typography>
-
-							<Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+							<ResultTitle variant="subtitle1">No connection found</ResultTitle>
+							<ResultDescription variant="body2" color="text.secondary">
 								No path was found between these two entities within the current search depth.
-							</Typography>
+							</ResultDescription>
 						</>
 					)}
-				</Box>
+				</Result>
 			)}
 		</Box>
 	);
+
 }
 
 type SelectedEntityCardProps = {
-	entity: SelectedEntity;
+	entity: SelectedEntityType;
 	onClear: () => void;
 };
 
 function SelectedEntityCard({ entity, onClear }: SelectedEntityCardProps) {
 	return (
-		<Box className={styles.selectedEntity}>
-			<Box>
-				<Typography sx={{ fontWeight: 600 }}>{entity.name}</Typography>
-
-				<Typography variant="body2" color="text.secondary">
-					{entity.type}
-				</Typography>
-			</Box>
-
-			<Button size="small" onClick={onClear}>
-				Change
-			</Button>
-		</Box>
+		<SelectedEntity>
+			<SelectedEntityContent>
+				<SelectedEntityName>{entity.name}</SelectedEntityName>
+				<Typography variant="body2" color="text.secondary">{entity.type}</Typography>
+			</SelectedEntityContent>
+			<ChangeButton size="small" onClick={onClear}>Change</ChangeButton>
+		</SelectedEntity>
 	);
 }
 
