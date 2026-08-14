@@ -917,8 +917,6 @@ The UI includes loading and error handling around API/database operations and pr
 
 # 19. Screen Recording
 
-**[SCREEN RECORDING URL — ADD BEFORE SUBMISSION]**
-
 The recording demonstrates:
 
 1. Opening the application.
