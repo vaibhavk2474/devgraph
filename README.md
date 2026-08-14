@@ -919,17 +919,19 @@ The UI includes loading and error handling around API/database operations and pr
 
 The recording demonstrates:
 
-1. Opening the application.
-2. Searching for an entity.
-3. Opening the graph.
-4. Selecting a node.
-5. Exploring one-hop relationships.
-6. Returning to discovery.
-7. Selecting two entities.
-8. Finding their connection.
-9. Viewing the highlighted path and connection summary.
-10. exploring relationships
-11. checking Mobile view
+1. **Open the application.**
+2. **Select "Explore Network."**
+3. **Search for an entity to explore its relationships.**
+4. **Select an entity and open its graph.**
+5. **Explore the initial one-hop relationships displayed in the graph.**
+6. **Select a connected node to explore its one-hop relationships.**
+7. **Return to the Discovery page.**
+8. **Select "Find Connection."**
+9. **Select two entities and find the connection between them.**
+10. **View the highlighted connection path and connection summary.**
+11. **Explore the relationships along the discovered path.**
+12. **Switch to the mobile view.**
+13. **demonstrate the responsive layout.**
 
 Recommended duration: approximately 2–3 minutes.
 
